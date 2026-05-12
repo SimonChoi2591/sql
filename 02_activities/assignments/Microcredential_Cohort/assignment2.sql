@@ -239,6 +239,44 @@ FROM temp.work_vendor_inventory as twvi
 cross join customer c
 ;
 
+/*
+sum up into total_revenue, thus only 6 row s of product. 
+*/
+SELECT
+v.vendor_name
+,p.product_name
+--,COUNT(c.customer_id) AS total_customers
+--,vi.original_price
+,COUNT(c.customer_id) * 5 * vi.original_price AS total_revenue
+/*
+ -- there is some difference from the vi.original_price vs cp.cost_to_customer_per_qty
+,COUNT(c.customer_id) * 5 * (SELECT cp.cost_to_customer_per_qty
+	FROM customer_purchases cp
+	WHERE cp.product_id = p.product_id
+	LIMIT 1
+    ) AS total_revenue2
+*/	  
+FROM vendor_inventory AS vi
+
+INNER JOIN product p
+ON p.product_id = vi.product_id
+
+INNER JOIN vendor v
+ON v.vendor_id = vi.vendor_id
+
+CROSS JOIN customer c
+
+GROUP BY
+v.vendor_name,
+p.product_name,
+vi.original_price
+
+ORDER BY
+v.vendor_name,
+p.product_name
+;
+
+
 --END QUERY
 
 
